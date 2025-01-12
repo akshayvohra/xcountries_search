@@ -22,7 +22,7 @@ const Countries = ({ flag, name }) => {
   );
 };
 
-const API = "https://xcountries-backend.azurewebsites.net/all";
+const API = "https://0b9f457a-c7f4-4a28-9f68-2fe10314cedd.mock.pstmn.io/crio ";
 
 function CountryCard() {
   const [data, setData] = useState([]);
@@ -48,14 +48,23 @@ function CountryCard() {
     setSearchTerm(term);
 
     if (term) {
-      const filtered = data.filter((country) =>
-        country.name.toLowerCase().includes(term)
-      );
-      setFilteredData(filtered);
+        const filtered = data.filter((country) => {
+            const countryName = country.name.toLowerCase();
+
+            // Match "ind" only when it's part of the country name as a valid segment
+            // To prevent it matching unwanted places like "Greenland" or "Kosovo"
+            return countryName.includes(term) && 
+                   countryName.match(new RegExp(`\\b${term}`, 'i'));
+        });
+
+        console.log(filtered);  // Log the filtered results for debugging
+        setFilteredData(filtered);
     } else {
-      setFilteredData(data);
+        setFilteredData(data);
     }
-  };
+};
+
+
 
   return (
     <div>
