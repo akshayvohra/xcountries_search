@@ -16,13 +16,18 @@ const Countries = ({ flag, name }) => {
         textAlign: "center",
       }}
     >
-      <img src={flag} alt={`Flag of ${name}`} style={{ width: "100px", height: "100px" }} />
-      <h2>{name}</h2>
+      <img
+        src={flag || "https://via.placeholder.com/100"}
+        alt={`Flag of ${name}`}
+        style={{ width: "100px", height: "100px" }}
+      />
+      <h2>{name || "Unknown"}</h2>
     </div>
   );
 };
 
-const API = "https://0b9f457a-c7f4-4a28-9f68-2fe10314cedd.mock.pstmn.io/crio ";
+const API =
+  "https://countries-search-data-prod-812920491762.asia-south1.run.app/countries";
 
 function CountryCard() {
   const [data, setData] = useState([]);
@@ -34,10 +39,11 @@ function CountryCard() {
       try {
         const response = await fetch(API);
         const jsonData = await response.json();
+        console.log("Fetched Data:", jsonData); 
         setData(jsonData);
         setFilteredData(jsonData);
       } catch (error) {
-        console.error("Error fetching data: ", error);
+        console.error("Error fetching data:", error);
       }
     };
     fetchCountryCard();
@@ -48,23 +54,15 @@ function CountryCard() {
     setSearchTerm(term);
 
     if (term) {
-        const filtered = data.filter((country) => {
-            const countryName = country.name.toLowerCase();
-
-            // Match "ind" only when it's part of the country name as a valid segment
-            // To prevent it matching unwanted places like "Greenland" or "Kosovo"
-            return countryName.includes(term) && 
-                   countryName.match(new RegExp(`\\b${term}`, 'i'));
-        });
-
-        console.log(filtered);  // Log the filtered results for debugging
-        setFilteredData(filtered);
+      const filtered = data.filter((country) => {
+        const countryName = country.common?.toLowerCase() || ""; 
+        return countryName.includes(term);
+      });
+      setFilteredData(filtered);
     } else {
-        setFilteredData(data);
+      setFilteredData(data);
     }
-};
-
-
+  };
 
   return (
     <div>
@@ -92,8 +90,12 @@ function CountryCard() {
           justifyContent: "center",
         }}
       >
-        {filteredData.map((countryData) => (
-          <Countries key={countryData.name} name={countryData.name} flag={countryData.flag} />
+        {filteredData.map((countryData, index) => (
+          <Countries
+            key={index}
+            name={countryData.common}
+            flag={countryData.png}
+          />
         ))}
         {filteredData.length === 0 && (
           <p style={{ fontSize: "18px", color: "red" }}>No countries found.</p>
